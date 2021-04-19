@@ -8,8 +8,10 @@ import os
 class testClass:
     loop = None
     future = None
+    loadedLibrary = None
     exampleDll = None
-
+    callback_type = None
+    callback_as_cfunc = None
 
     def finish(self):
         #now in the right c thread and eventloop.
@@ -28,30 +30,33 @@ class testClass:
 
 
     async def register_and_wait(self):
+        print("future 1")
         self.loop = asyncio.get_event_loop()
         self.future=self.loop.create_future()
 
-        callback_type = ctypes.CFUNCTYPE(None)
-        callback_as_cfunc = callback_type(self.example_callback)
-
         #now register the callback and wait
-        self.exampleDll.fnminimalExample(callback_as_cfunc, ctypes.c_int(1))
+        print("future 2")
+        self.exampleDll.fnminimalExample(self.callback_as_cfunc, ctypes.c_int(1))
 
+        print("future 3")
         await self.future
         print("future has finished")
 
     def main(self):
+        asyncio.run(self.register_and_wait())
+
+    def __init__(self):
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minimalExample.dll")
         #print(path)
-        ctypes.cdll.LoadLibrary(path)
+        loadedLibrary = ctypes.cdll.LoadLibrary(path)
         #for easy access
         self.exampleDll = ctypes.cdll.minimalExample
-
-        asyncio.run(self.register_and_wait())
+        self.callback_type = ctypes.CFUNCTYPE(None)
+        self.callback_as_cfunc = self.callback_type(self.example_callback)
 
 
 if __name__ == "__main__":
+    test = testClass()
     for i in range(0,100000):
         print(i)
-        test = testClass()
         test.main()
