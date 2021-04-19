@@ -5,6 +5,7 @@
 #include "framework.h"
 #include <Windows.h>
 #include "minimalExample.h"
+#include <stdio.h>
 
 HANDLE callback_thread;
 DWORD threadID;
@@ -20,6 +21,7 @@ DWORD WINAPI eventuallyCallback(LPVOID lpParam) {
 
 DWORD WINAPI immediateCallback(LPVOID lpParam) {
   auto callback = reinterpret_cast<CallbackFct>(lpParam);
+  fprintf(stderr, "callback!\n");
   callback();
   return 0;
 }
@@ -28,6 +30,7 @@ DWORD WINAPI immediateCallback(LPVOID lpParam) {
 // wait 2 seconds then perform the callback
 MINIMALEXAMPLE_API int fnminimalExample(void* callback_to_python, int mode)
 {
+  fprintf(stderr, "in se cee!\n");
   if (mode == 0) {
     callback_thread = CreateThread(
       NULL,
@@ -49,6 +52,7 @@ MINIMALEXAMPLE_API int fnminimalExample(void* callback_to_python, int mode)
     );
   }
   WaitForSingleObject(callback_thread, 0);
+  CloseHandle(callback_thread);
 
   return 0;
 }
