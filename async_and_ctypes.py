@@ -31,7 +31,6 @@ class testClass:
 
     async def register_and_wait(self):
         print("future 1")
-        self.loop = asyncio.get_event_loop()
         self.future=self.loop.create_future()
 
         #now register the callback and wait
@@ -43,7 +42,7 @@ class testClass:
         print("future has finished")
 
     def main(self):
-        asyncio.run(self.register_and_wait())
+        self.loop.run_until_complete(self.register_and_wait())
 
     def __init__(self):
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minimalExample.dll")
@@ -53,7 +52,7 @@ class testClass:
         self.exampleDll = ctypes.cdll.minimalExample
         self.callback_type = ctypes.CFUNCTYPE(None)
         self.callback_as_cfunc = self.callback_type(self.example_callback)
-
+        self.loop = asyncio.get_event_loop()
 
 if __name__ == "__main__":
     test = testClass()
